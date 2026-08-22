@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Happy Birthday — Story Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Cinzel:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+        --paper: #FFF5F4;
+        --paper-deep: #FBDCE1;
+        --burgundy: #C41230;
+        --wine: #E5486A;
+        --rosegold: #F0879E;
+        --ink: #4A1620;
+        --ink-soft: #8A4552;
+        --card: #FFFDFC;
+        --shadow: rgba(139, 10, 30, 0.28);
+    }
+
+    html, body { height: 100%; background: #1f0a0e; overflow: hidden; }
+
+    body {
+        font-family: 'Lora', serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ============================================================
+       STAGE — holds one 9:16 slide at a time, sized for screenshotting
+    ============================================================ */
+    .stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        max-width: 480px;
+        max-height: 853.33px;
+        aspect-ratio: 9 / 16;
+        margin: auto;
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    }
+
+    /* progress dots like IG stories */
+    .dots {
+        position: absolute;
+        top: 3.5%;
+        left: 6%;
+        right: 6%;
+        z-index: 20;
+        display: flex;
+        gap: 6px;
+    }
+    .dots span {
+        flex: 1;
+        height: 3px;
+        border-radius: 3px;
+        background: rgba(255,255,255,0.35);
+        overflow: hidden;
+    }
+    .dots span::after {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: #fff;
+    }
+    .dots span.done::after { width: 100%; }
+    .dots span.active::after { width: 100%; }
+
+    /* tap zones */
+    .tap-zone {
+        position: absolute;
+        top: 0; bottom: 0;
+        width: 50%;
+        z-index: 15;
+    }
+    .tap-zone.left { left: 0; }
+    .tap-zone.right { right: 0; }
+
+    .slide-counter {
+        position: absolute;
+        bottom: 3%;
+        left: 0; right: 0;
+        text-align: center;
+        z-index: 20;
+        font-family: 'Cinzel', serif;
+        font-size: 0.62rem;
+        letter-spacing: 2px;
+        color: rgba(74,22,32,0.55);
+    }
+
+    .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+    }
+    .slide.active { display: flex; }
+
+    .slide::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background-image: radial-gradient(rgba(196,18,48,0.05) 1px, transparent 1px);
+        background-size: 3px 3px;
+    }
+    .blob-1, .blob-2 {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(14px);
+        z-index: 0;
+        pointer-events: none;
+    }
+    .blob-1 { width: 55%; height: 26%; background: radial-gradient(circle, rgba(229,72,106,0.22), transparent 70%); top: -6%; right: -14%; }
+    .blob-2 { width: 50%; height: 22%; background: radial-gradient(circle, rgba(196,18,48,0.16), transparent 70%); bottom: -4%; left: -12%; }
+
+    .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--rosegold); opacity: 0.55; z-index: 2; }
+    .corner.tl { top: 8%; left: 5.5%; border-right: none; border-bottom: none; }
+    .corner.tr { top: 8%; right: 5.5%; border-left: none; border-bottom: none; }
+    .corner.bl { bottom: 8%; left: 5.5%; border-right: none; border-top: none; }
+    .corner.br { bottom: 8%; right: 5.5%; border-left: none; border-top: none; }
+
+    /* drifting hearts, reused across slides */
+    .hearts-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .floating-heart { position: absolute; bottom: -6%; opacity: 0; animation: heartRise 6s ease-in forwards; }
+    @keyframes heartRise {
+        0% { opacity: 0; transform: translateY(0) scale(0.7) rotate(0deg); }
+        12% { opacity: 0.9; }
+        85% { opacity: 0.35; }
+        100% { opacity: 0; transform: translateY(-92vh) scale(1.15) rotate(16deg); }
+    }
+
+    /* ===== SLIDE 1: Cover ===== */
+    #slide-1 { background: radial-gradient(circle at 50% 30%, var(--paper-deep), var(--paper) 70%); justify-content: center; }
+    .cover-eyebrow {
+        font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 4px; text-transform: uppercase;
+        color: var(--ink-soft); margin-bottom: 16px; text-align: center; position: relative; z-index: 2;
+    }
+    .cover-name {
+        font-family: 'Mrs Saint Delafield', cursive; font-size: clamp(2.6rem, 13vw, 3.6rem);
+        color: var(--burgundy); margin-bottom: 30px; text-align: center; position: relative; z-index: 2;
+    }
+    .wax-seal {
+        width: 84px; height: 84px; border-radius: 50%; margin: 0 auto;
+        background: radial-gradient(circle at 35% 30%, var(--wine), var(--burgundy) 70%);
+        box-shadow: 0 10px 26px var(--shadow), inset 0 -6px 12px rgba(0,0,0,0.25), inset 0 4px 8px rgba(255,255,255,0.15);
+        color: var(--paper); font-size: 2rem; display: flex; align-items: center; justify-content: center;
+        position: relative; z-index: 2; animation: sealPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes sealPulse {
+        0%,100% { box-shadow: 0 10px 26px var(--shadow), 0 0 0 0 rgba(229,72,106,0.35); }
+        50% { box-shadow: 0 10px 26px var(--shadow), 0 0 0 14px rgba(229,72,106,0); }
+    }
+    .cover-hint {
+        margin-top: 18px; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 2.5px;
+        text-transform: uppercase; color: var(--ink-soft); opacity: 0.75; text-align: center; position: relative; z-index: 2;
+    }
+
+    /* ===== SLIDE 2: Birthday wish card ===== */
+    #slide-2 { background: radial-gradient(circle at 50% 18%, var(--paper-deep), var(--paper) 68%); justify-content: center; padding: 9% 8%; }
+    .ribbon {
+        font-family: 'Cinzel', serif; font-size: clamp(0.6rem, 2.6vw, 0.74rem); letter-spacing: 2.5px; text-transform: uppercase;
+        color: var(--paper); background: linear-gradient(120deg, var(--wine), var(--burgundy)); padding: 8px 22px;
+        border-radius: 30px; box-shadow: 0 10px 20px var(--shadow); margin-bottom: 5%; position: relative; z-index: 2;
+    }
+    .photo-frame {
+        width: 30%; aspect-ratio: 1/1; border-radius: 50%; overflow: hidden; border: 5px solid var(--card);
+        box-shadow: 0 0 0 2px rgba(229,72,106,0.55), 0 18px 34px var(--shadow); margin-bottom: 5%;
+        position: relative; z-index: 2; animation: photoFloat 4.2s ease-in-out infinite;
+    }
+    .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    @keyframes photoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .message { position: relative; z-index: 2; }
+    .message p { font-size: clamp(0.8rem, 3.1vw, 0.94rem); color: var(--ink-soft); font-style: italic; line-height: 1.6; margin-bottom: 3.2%; padding: 0 1%; }
+    .message p:last-child { margin-bottom: 0; }
+    .divider { width: 44px; height: 1px; background: var(--rosegold); opacity: 0.65; margin: 4% auto; position: relative; z-index: 2; }
+    .signature { font-family: 'Mrs Saint Delafield', cursive; font-size: clamp(1.4rem, 6vw, 1.7rem); color: var(--wine); position: relative; z-index: 2; }
+
+    /* ===== SLIDE 3: Gallery collage ===== */
+    #slide-3 { background: linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%); justify-content: flex-start; padding: 10% 7% 6%; }
+    .gallery-title {
+        font-family: 'Cormorant Garamond', serif; font-weight: 700; color: var(--burgundy);
+        font-size: clamp(1.3rem, 5.5vw, 1.6rem); margin-bottom: 2%; text-align: center; position: relative; z-index: 2;
+    }
+    .gallery-sub {
+        font-size: clamp(0.7rem, 2.8vw, 0.82rem); color: var(--ink-soft); font-style: italic;
+        margin-bottom: 5%; text-align: center; position: relative; z-index: 2;
+    }
+    .collage { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; position: relative; z-index: 2; }
+    .collage .polaroid { background: var(--card); padding: 6px 6px 20px; border-radius: 3px; box-shadow: 0 10px 20px rgba(59,20,27,0.18); }
+    .collage .polaroid:nth-child(odd) { transform: rotate(-2.5deg); }
+    .collage .polaroid:nth-child(even) { transform: rotate(2.5deg); }
+    .collage .polaroid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 1px; }
+    .collage .polaroid p { font-family: 'Mrs Saint Delafield', cursive; font-size: 0.95rem; color: var(--burgundy); text-align: center; margin-top: 4px; }
+
+    /* ===== SLIDE 4: Message from the heart ===== */
+    #slide-4 { background: linear-gradient(160deg, var(--burgundy), var(--wine)); justify-content: center; padding: 10% 9%; }
+    .msg4-title { font-family: 'Cormorant Garamond', serif; font-weight: 700; color: var(--paper); font-size: clamp(1.4rem, 6vw, 1.8rem); margin-bottom: 6%; text-align: center; position: relative; z-index: 2; }
+    .msg4-text { font-size: clamp(0.86rem, 3.4vw, 1rem); color: var(--paper-deep); font-style: italic; line-height: 1.9; text-align: center; margin-bottom: 6%; position: relative; z-index: 2; }
+    .msg4-sign { font-family: 'Mrs Saint Delafield', cursive; font-size: clamp(1.6rem, 6.5vw, 2rem); color: var(--paper); text-align: center; position: relative; z-index: 2; }
+
+    /* ===== SLIDE 5: Closing ===== */
+    #slide-5 { background: radial-gradient(circle at 50% 30%, var(--paper-deep), var(--paper) 70%); justify-content: center; }
+    .footer-heart { font-size: 1.8rem; color: var(--rosegold); margin-bottom: 14px; text-align: center; position: relative; z-index: 2; }
+    .footer-text { font-family: 'Cinzel', serif; font-size: clamp(0.8rem, 3.4vw, 0.95rem); letter-spacing: 2px; text-transform: uppercase; color: var(--burgundy); margin-bottom: 16px; text-align: center; position: relative; z-index: 2; }
+    .footer-divider { width: 60px; height: 1px; background: var(--rosegold); margin: 0 auto 16px; opacity: 0.6; position: relative; z-index: 2; }
+    .footer-signature { font-family: 'Mrs Saint Delafield', cursive; font-size: clamp(1.5rem, 6.5vw, 1.9rem); color: var(--wine); text-align: center; position: relative; z-index: 2; }
+
+    @media (max-width: 380px) {
+        .collage .polaroid p { font-size: 0.8rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+    <div class="dots" id="dots"></div>
+    <div class="slide-counter" id="counter">1 / 5 — tap right to continue</div>
+    <div class="tap-zone left" id="tapLeft"></div>
+    <div class="tap-zone right" id="tapRight"></div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide active" id="slide-1">
+        <div class="blob-1"></div><div class="blob-2"></div>
+        <div class="hearts-layer" data-hearts></div>
+        <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+        <div style="margin:auto; text-align:center;">
+            <p class="cover-eyebrow">A little surprise for</p>
+            <h1 class="cover-name">Susmita</h1>
+            <div class="wax-seal">♥</div>
+            <p class="cover-hint">happy birthday, Susmita</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Wish card -->
+    <div class="slide" id="slide-2">
+        <div class="blob-1"></div><div class="blob-2"></div>
+        <div class="hearts-layer" data-hearts></div>
+        <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+        <span class="ribbon">🎂 Happy Birthday</span>
+        <div class="photo-frame"><img src="image-three.jpg" alt=""></div>
+        <div class="message">
+            <p>Happy Birthday to someone who may no longer be a part of my life the way you once were, but will always remain special to me. 💕</p>
+            <p>Some things change with time, but caring about someone doesn't always fade away.</p>
+            <p>I may not say much anymore, but I genuinely hope you're happy, safe, and doing well.</p>
+            <p>Take care of yourself, keep smiling, and have a beautiful birthday. 💞</p>
+        </div>
+        <div class="divider"></div>
+        <p class="signature">Love You Endless 💝</p>
+    </div>
+
+    <!-- Slide 3: Gallery -->
+    <div class="slide" id="slide-3">
+        <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+        <p class="gallery-title">Cherished Moments</p>
+        <p class="gallery-sub">a few reasons to smile</p>
+        <div class="collage">
+            <div class="polaroid"><img src="image-one.jpg" alt=""><p>precious</p></div>
+            <div class="polaroid"><img src="image-two.jpg" alt=""><p>that smile</p></div>
+            <div class="polaroid"><img src="image-four.jpg" alt=""><p>happy times</p></div>
+            <div class="polaroid"><img src="image-five.jpg" alt=""><p>forever</p></div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Message from the heart -->
+    <div class="slide" id="slide-4">
+        <div style="margin:auto; width:100%;">
+            <p class="msg4-title">A Message From The Heart</p>
+            <p class="msg4-text">On your special day, we celebrate not just your birth, but the beautiful soul you are. May this year bring endless joy, wonderful adventures, and all the happiness you truly deserve.</p>
+            <p class="msg4-sign">With all our love</p>
+        </div>
+    </div>
+
+    <!-- Slide 5: Closing -->
+    <div class="slide" id="slide-5">
+        <div class="blob-1"></div><div class="blob-2"></div>
+        <div class="hearts-layer" data-hearts></div>
+        <div style="margin:auto; text-align:center;">
+            <p class="footer-heart">♥</p>
+            <p class="footer-text">Happy Birthday Susmita Amrin</p>
+            <div class="footer-divider"></div>
+            <p class="footer-signature">with love, always</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const totalSlides = 5;
+    let current = 1;
+    const dotsBox = document.getElementById('dots');
+    const counter = document.getElementById('counter');
+
+    for (let i = 1; i <= totalSlides; i++) {
+        const d = document.createElement('span');
+        d.id = 'dot-' + i;
+        dotsBox.appendChild(d);
+    }
+
+    function renderDots() {
+        for (let i = 1; i <= totalSlides; i++) {
+            const d = document.getElementById('dot-' + i);
+            d.classList.remove('active', 'done');
+            if (i < current) d.classList.add('done');
+            if (i === current) d.classList.add('active');
+        }
+    }
+
+    function showSlide(n) {
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        document.getElementById('slide-' + n).classList.add('active');
+        current = n;
+        renderDots();
+        counter.textContent = n + ' / ' + totalSlides + (n < totalSlides ? ' — tap right to continue' : ' — the end');
+    }
+
+    document.getElementById('tapRight').addEventListener('click', () => {
+        if (current < totalSlides) showSlide(current + 1);
+    });
+    document.getElementById('tapLeft').addEventListener('click', () => {
+        if (current > 1) showSlide(current - 1);
+    });
+
+    // gentle drifting hearts on slides that have a hearts-layer
+    function spawnHeart(layer) {
+        const emojis = ['💕', '💗', '💞', '💝'];
+        const h = document.createElement('span');
+        h.className = 'floating-heart';
+        h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        h.style.left = (5 + Math.random() * 85) + '%';
+        h.style.fontSize = (0.8 + Math.random() * 0.8) + 'rem';
+        h.style.animationDuration = (5 + Math.random() * 2) + 's';
+        layer.appendChild(h);
+        setTimeout(() => h.remove(), 8000);
+    }
+    document.querySelectorAll('[data-hearts]').forEach(layer => {
+        for (let i = 0; i < 4; i++) setTimeout(() => spawnHeart(layer), i * 400);
+        setInterval(() => spawnHeart(layer), 1000);
+    });
+
+    renderDots();
+</script>
+</body>
+</html>
